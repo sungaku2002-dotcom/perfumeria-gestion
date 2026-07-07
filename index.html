@@ -69,17 +69,14 @@
   }
 
   /* ---------- Layout ---------- */
-  .app{ display:flex; min-height:100vh; position:relative; z-index:1; }
+  .app{ position:relative; z-index:1; min-height:100vh; }
 
-  .sidebar{
-    width:250px; flex:0 0 250px;
-    background:linear-gradient(180deg, var(--bg-deep), #0e0b16 60%);
-    border-right:1px solid var(--border);
-    display:flex; flex-direction:column;
-    padding:26px 18px;
-    position:sticky; top:0; height:100vh;
+  .topstrip{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 42px; border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, var(--bg-deep), transparent);
   }
-  .brand{ display:flex; align-items:center; gap:12px; padding:0 6px 22px; border-bottom:1px solid var(--border); margin-bottom:18px; }
+  .brand{ display:flex; align-items:center; gap:12px; }
   .brand-icon{
     width:42px; height:42px; border-radius:50%;
     background:radial-gradient(circle at 30% 30%, var(--gold-soft), var(--gold) 60%, #7a5e14);
@@ -89,8 +86,8 @@
   }
   .brand-name{ font-family:var(--font-title); font-size:1.35rem; color:var(--gold-soft); line-height:1.15; }
   .brand-sub{ font-size:.68rem; color:var(--text-muted); letter-spacing:.14em; text-transform:uppercase; }
+  .topstrip-note{ font-size:.72rem; color:var(--text-muted); opacity:.65; }
 
-  .nav{ display:flex; flex-direction:column; gap:4px; flex:1; }
   .nav-item{
     display:flex; align-items:center; gap:12px;
     background:transparent; border:none; color:var(--text-muted);
@@ -102,9 +99,46 @@
   .nav-item:hover{ background:var(--panel-hover); color:var(--text); }
   .nav-item.active{ background:var(--gold-dim); color:var(--gold-soft); box-shadow:inset 0 0 0 1px rgba(212,175,55,.25); }
 
-  .sidebar-footer{ font-size:.7rem; color:var(--text-muted); opacity:.6; padding:10px 6px 0; border-top:1px solid var(--border); margin-top:14px; }
+  .main{ padding:34px 42px 130px; }
 
-  .main{ flex:1; min-width:0; padding:34px 42px 60px; }
+  /* ---------- Dock (navegación inferior) ---------- */
+  .dock-outer{
+    position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+    z-index:60; max-width:94vw;
+  }
+  .dock{
+    display:flex; align-items:flex-end; gap:10px;
+    background:linear-gradient(160deg, var(--panel), var(--panel-2));
+    border:1px solid var(--border); border-radius:26px;
+    padding:10px 16px; box-shadow:var(--shadow);
+    overflow-x:auto; overflow-y:visible; scrollbar-width:none;
+  }
+  .dock::-webkit-scrollbar{ display:none; }
+  .dock .nav-item{
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    flex:0 0 auto;
+    width:46px; height:46px; padding:0; border-radius:50%;
+    background:var(--panel-2); border:1px solid var(--border); color:var(--text-muted);
+    transition:transform .18s cubic-bezier(.34,1.56,.64,1), background .15s ease, color .15s ease, border-color .15s ease;
+    transform-origin:bottom center;
+  }
+  .dock .nav-item .ic{ font-size:1.2rem; width:auto; }
+  .dock .nav-item:hover{ background:var(--panel-hover); color:var(--text); }
+  .dock .nav-item.active{
+    background:linear-gradient(135deg, var(--gold-soft), var(--gold)); color:#241b02;
+    border-color:var(--gold); box-shadow:0 0 14px rgba(212,175,55,.4);
+  }
+  .dock .dock-label{
+    position:absolute; bottom:calc(100% + 12px); left:50%; transform:translateX(-50%) translateY(4px);
+    white-space:nowrap; background:var(--panel-2); border:1px solid var(--border); color:var(--text);
+    font-size:.72rem; padding:5px 10px; border-radius:8px; box-shadow:var(--shadow);
+    opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease;
+  }
+  .dock .nav-item:hover .dock-label,
+  .dock .nav-item:focus-visible .dock-label{
+    opacity:1; transform:translateX(-50%) translateY(0);
+  }
   .topbar{ margin-bottom:28px; display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; }
   .topbar h1{ font-size:2.1rem; color:var(--text); }
   .topbar .sub{ color:var(--text-muted); font-size:.88rem; }
@@ -255,15 +289,16 @@
 
   .hidden{ display:none !important; }
 
-  /* Mobile sidebar */
+  /* Mobile layout */
   @media (max-width:800px){
-    .app{ flex-direction:column; }
-    .sidebar{ position:relative; height:auto; width:100%; flex:none; padding:16px; }
-    .nav{ flex-direction:row; overflow-x:auto; gap:6px; }
-    .nav-item{ flex:0 0 auto; }
-    .sidebar-footer{ display:none; }
-    .main{ padding:24px 18px 50px; }
+    .topstrip{ padding:14px 18px; }
+    .topstrip-note{ display:none; }
+    .main{ padding:24px 18px 120px; }
     .form-grid{ grid-template-columns:1fr; }
+    .dock-outer{ bottom:12px; max-width:98vw; }
+    .dock{ gap:6px; padding:8px 10px; border-radius:22px; }
+    .dock .nav-item{ width:40px; height:40px; }
+    .dock .nav-item .ic{ font-size:1.05rem; }
   }
 </style>
 </head>
@@ -288,7 +323,7 @@
 </div>
 
 <div class="app">
-  <aside class="sidebar">
+  <header class="topstrip">
     <div class="brand">
       <div class="brand-icon">🧴</div>
       <div>
@@ -296,16 +331,8 @@
         <div class="brand-sub">Gestión</div>
       </div>
     </div>
-    <nav class="nav">
-      <button class="nav-item active" data-view="dashboard"><span class="ic">📊</span><span>Dashboard</span></button>
-      <button class="nav-item" data-view="inventario"><span class="ic">📦</span><span>Inventario</span></button>
-      <button class="nav-item" data-view="venta"><span class="ic">🧾</span><span>Registrar Venta</span></button>
-      <button class="nav-item" data-view="historial"><span class="ic">📜</span><span>Historial</span></button>
-      <button class="nav-item" data-view="deudas"><span class="ic">💳</span><span>Fiados / Deudas</span></button>
-      <button class="nav-item" data-view="config"><span class="ic">⚙️</span><span>Configuración</span></button>
-    </nav>
-    <div class="sidebar-footer">Datos guardados en este navegador (localStorage).</div>
-  </aside>
+    <div class="topstrip-note">Datos guardados en este navegador (localStorage).</div>
+  </header>
 
   <main class="main">
     <header class="topbar">
@@ -502,6 +529,17 @@
       </div>
     </section>
   </main>
+</div>
+
+<div class="dock-outer" aria-label="Navegación principal">
+  <nav class="dock" role="toolbar" aria-label="Menú de navegación">
+    <button class="nav-item active" data-view="dashboard" aria-label="Dashboard"><span class="ic">📊</span><span class="dock-label">Dashboard</span></button>
+    <button class="nav-item" data-view="inventario" aria-label="Inventario"><span class="ic">📦</span><span class="dock-label">Inventario</span></button>
+    <button class="nav-item" data-view="venta" aria-label="Registrar Venta"><span class="ic">🧾</span><span class="dock-label">Registrar Venta</span></button>
+    <button class="nav-item" data-view="historial" aria-label="Historial"><span class="ic">📜</span><span class="dock-label">Historial</span></button>
+    <button class="nav-item" data-view="deudas" aria-label="Fiados / Deudas"><span class="ic">💳</span><span class="dock-label">Fiados / Deudas</span></button>
+    <button class="nav-item" data-view="config" aria-label="Configuración"><span class="ic">⚙️</span><span class="dock-label">Configuración</span></button>
+  </nav>
 </div>
 
 <div class="modal-overlay" id="modalOverlay">
@@ -1243,6 +1281,43 @@
   }
 
   /* ===========================================================
+     DOCK (navegación inferior con efecto de magnificación)
+  =========================================================== */
+  function initDock(){
+    var dock = document.querySelector('.dock');
+    if(!dock) return;
+    var items = Array.prototype.slice.call(dock.querySelectorAll('.nav-item'));
+    if(!items.length) return;
+
+    var DISTANCE = 110;
+    var MAX_SCALE = 1.5;
+
+    function isTouch(){
+      try{ return window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse)').matches; }
+      catch(e){ return false; }
+    }
+
+    function reset(){
+      items.forEach(function(it){ it.style.transform = 'scale(1)'; });
+    }
+
+    if(isTouch()) return; // en touch no hace falta el efecto de proximidad
+
+    dock.addEventListener('mousemove', function(e){
+      var mouseX = e.clientX;
+      items.forEach(function(it){
+        var rect = it.getBoundingClientRect();
+        var center = rect.left + rect.width / 2;
+        var dist = Math.abs(mouseX - center);
+        var scale = dist < DISTANCE ? 1 + (MAX_SCALE - 1) * (1 - dist / DISTANCE) : 1;
+        it.style.transform = 'scale(' + scale.toFixed(3) + ')';
+      });
+    });
+
+    dock.addEventListener('mouseleave', reset);
+  }
+
+  /* ===========================================================
      MODAL
   =========================================================== */
   function openModal(html){
@@ -1331,6 +1406,7 @@
     applyBusinessName();
     bindEvents();
     initEtherealShadow();
+    initDock();
     document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('es-AR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
     renderDashboard();
   }
